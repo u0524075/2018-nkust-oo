@@ -1,0 +1,101 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "import requests\n",
+    "\n",
+    "\n",
+    "class Blockchain(object)\n",
+    "    ...\n",
+    "    \n",
+    "    def valid_chain(self, chain):\n",
+    "        \"\"\"\n",
+    "        Determine if a given blockchain is valid\n",
+    "        :param chain: <list> A blockchain\n",
+    "        :return: <bool> True if valid, False if not\n",
+    "        \"\"\"\n",
+    "\n",
+    "        last_block = chain[0]\n",
+    "        current_index = 1\n",
+    "\n",
+    "        while current_index < len(chain):\n",
+    "            block = chain[current_index]\n",
+    "            print(f'{last_block}')\n",
+    "            print(f'{block}')\n",
+    "            print(\"\\n-----------\\n\")\n",
+    "            # Check that the hash of the block is correct\n",
+    "            if block['previous_hash'] != self.hash(last_block):\n",
+    "                return False\n",
+    "\n",
+    "            # Check that the Proof of Work is correct\n",
+    "            if not self.valid_proof(last_block['proof'], block['proof']):\n",
+    "                return False\n",
+    "\n",
+    "            last_block = block\n",
+    "            current_index += 1\n",
+    "\n",
+    "        return True\n",
+    "\n",
+    "    def resolve_conflicts(self):\n",
+    "        \"\"\"\n",
+    "        解決衝突\n",
+    "        使用網路中最長的鏈.\n",
+    "        :return: <bool> True 如果鏈被取代, 不然就是False\n",
+    "        \"\"\"\n",
+    "\n",
+    "        neighbours = self.nodes\n",
+    "        new_chain = None\n",
+    "\n",
+    "        # We're only looking for chains longer than ours\n",
+    "        max_length = len(self.chain)\n",
+    "\n",
+    "        # Grab and verify the chains from all the nodes in our network\n",
+    "        for node in neighbours:\n",
+    "            response = requests.get(f'http://{node}/chain')\n",
+    "\n",
+    "            if response.status_code == 200:\n",
+    "                length = response.json()['length']\n",
+    "                chain = response.json()['chain']\n",
+    "\n",
+    "                # Check if the length is longer and the chain is valid\n",
+    "                if length > max_length and self.valid_chain(chain):\n",
+    "                    max_length = length\n",
+    "                    new_chain = chain\n",
+    "\n",
+    "        # Replace our chain if we discovered a new, valid chain longer than ours\n",
+    "        if new_chain:\n",
+    "            self.chain = new_chain\n",
+    "            return True\n",
+    "\n",
+    "        return False\n"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.6.2"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
